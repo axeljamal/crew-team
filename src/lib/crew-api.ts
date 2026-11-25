@@ -1,12 +1,8 @@
 // The only place that talks to The Crew's team API. Server-only: the admin token is read from the environment
 // here and sent from the server, so it never reaches the browser bundle or the page HTML.
 import "server-only";
-import { cacheLife } from "next/cache";
 import { isWaveId, readConfig, teamUrl } from "./config";
 import type { HealthResponse, ReportsResponse, WaveBriefResponse, WavesResponse } from "./types";
-
-/** how long a fetched answer is reused before the next request refreshes it, in seconds */
-export const REVALIDATE_SECONDS = 60;
 
 export class CrewApiError extends Error {
   constructor(public status: number, message: string) {
@@ -16,16 +12,13 @@ export class CrewApiError extends Error {
 }
 
 async function getTeam<T>(path: string): Promise<T> {
-  "use cache";
-  cacheLife({ stale: REVALIDATE_SECONDS, revalidate: REVALIDATE_SECONDS, expire: REVALIDATE_SECONDS * 10 });
-
   const config = readConfig();
   const headers: HeadersInit = { Accept: "application/json" };
   if (config.token) headers.Authorization = `Bearer ${config.token}`;
 
   let res: Response;
   try {
-    res = await fetch(teamUrl(config, path), { headers });
+    res = await fetch(teamUrl(config, path), { headers, cache: "no-store" }); // fresh each request: a small team, a quick API
   } catch {
     throw new CrewApiError(502, "The team API could not be reached. Is CREW_API_BASE right, and is the server running?");
   }

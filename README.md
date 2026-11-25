@@ -39,7 +39,7 @@ The brief route (`/waves/:id`) does not filter by demo in the API. So before fet
 
 - **The token stays secret.** Data is fetched where the token lives, with no API proxy route to protect and no token in the client.
 - **Less JavaScript.** The pages are tables, tiles and bar charts with nothing to interact with, so they ship as HTML. The only client component is the nav, which needs the current path for `aria-current`, plus `error.tsx`, which Next requires to be a client component.
-- **Caching in one place.** Cache Components is on (the create-next-app 16 default). Each page calls `await connection()`, so the API is never needed at build time. The data functions use `"use cache"` with `cacheLife` set to 60 seconds, so the API is asked at most about once a minute per route. `loading.tsx` is the Suspense fallback, and the static shell (header, nav, demo banner) streams first.
+- **Fresh on every request.** Each page calls `await connection()`, so the API is never needed at build time, and the data functions fetch with `cache: "no-store"`. Cache Components is off: on Cloudflare Workers its `"use cache"` hung every request (Next.js cannot drive the Workers runtime's `setTimeout`), so the worker returned 500. `loading.tsx` is the Suspense fallback while the API answers.
 
 ## Accessibility
 
