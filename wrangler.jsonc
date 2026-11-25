@@ -1,0 +1,24 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  // Prepared for Cloudflare Workers with @opennextjs/cloudflare. Not deployed yet.
+  "name": "crew-team",
+  "main": ".open-next/worker.js",
+  "routes": [{ "pattern": "crew-team.marea-dvipa.uk", "custom_domain": true }],
+  "compatibility_date": "2026-11-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    // self-reference the OpenNext worker uses for its caches; the name must match "name" above
+    { "binding": "WORKER_SELF_REFERENCE", "service": "crew-team" }
+  ],
+  "vars": {
+    // where The Crew's API lives; the team routes are under /api/crew/team
+    "CREW_API_BASE": "https://axelle.marea-dvipa.uk"
+    // CREW_REAL is left unset on purpose: a public deploy shows demo data only.
+    // CREW_ADMIN_TOKEN is a secret, never a var: `npx wrangler secret put CREW_ADMIN_TOKEN` (not done yet).
+  },
+  "observability": { "enabled": true }
+}
